@@ -14,7 +14,7 @@ const BOOKS_TAB = 'Books';
 const SUMMARY_TAB = 'Summary';
 const GENRE_RANGE = 'A12:A25';
 const STATUSES = ['Read', 'Reading', 'To read'];
-const COLUMNS = ['title', 'author', 'genre', 'shelf', 'status', 'rating', 'acquired', 'notes'];
+const COLUMNS = ['title', 'author', 'genre', 'shelf', 'status', 'rating', 'acquired', 'notes', 'isbn'];
 
 function doGet(e) {
   try {
@@ -57,11 +57,15 @@ function doPost(e) {
       acquired = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
     }
 
+    const isbn = clean_(b.isbn).replace(/[\s-]/g, '').toUpperCase();
+    if (isbn && !/^(\d{9}[\dX]|\d{13})$/.test(isbn)) throw new Error('ISBN must be 10 or 13 digits.');
+
     lock.waitLock(10000);
     const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName(BOOKS_TAB);
     const row = firstEmptyRow_(sheet);
-    sheet.getRange(row, 1, 1, 8).setValues([[
-      title, author, genre, clean_(b.shelf), status, rating, acquired, clean_(b.notes)
+    sheet.getRange(row, 9).setNumberFormat('@'); // keep ISBN as text
+    sheet.getRange(row, 1, 1, 9).setValues([[
+      title, author, genre, clean_(b.shelf), status, rating, acquired, clean_(b.notes), isbn
     ]]);
     SpreadsheetApp.flush();
 
@@ -77,7 +81,7 @@ function readBooks_() {
   const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName(BOOKS_TAB);
   const last = sheet.getLastRow();
   if (last < 2) return [];
-  return sheet.getRange(2, 1, last - 1, 8).getDisplayValues()
+  return sheet.getRange(2, 1, last - 1, 9).getDisplayValues()
     .map(function (r, i) {
       const o = { row: i + 2 };
       COLUMNS.forEach(function (c, j) { o[c] = r[j]; });

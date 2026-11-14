@@ -110,6 +110,9 @@
       <label for="f-author">Author <span class="req">*</span></label>
       <input id="f-author" name="author" required maxlength="200">
 
+      <label for="f-isbn">ISBN</label>
+      <input id="f-isbn" name="isbn" inputmode="numeric" placeholder="10 or 13 digits" maxlength="20">
+
       <div class="row2">
         <div>
           <label for="f-genre">Genre</label>
@@ -266,7 +269,7 @@
     const fs = $('fStatus').value, fg = $('fGenre').value, sort = $('sort').value;
     let list = books.filter((b) =>
       (!fs || b.status === fs) && (!fg || b.genre === fg) &&
-      (!q || [b.title, b.author, b.notes, b.shelf].join(' ').toLowerCase().includes(q)));
+      (!q || [b.title, b.author, b.notes, b.shelf, b.isbn].join(' ').toLowerCase().includes(q)));
     const by = (k) => (a, b) => a[k].localeCompare(b[k], undefined, { sensitivity: 'base' });
     if (sort === 'recent') list.sort((a, b) => b.row - a.row);
     else if (sort === 'rating') list.sort((a, b) => (Number(b.rating) || 0) - (Number(a.rating) || 0));
@@ -289,7 +292,7 @@
       card.querySelector('.title').textContent = b.title;
       card.querySelector('.author').textContent = b.author;
       const meta = card.querySelector('.meta');
-      [b.genre, b.shelf && '📍 ' + b.shelf, b.acquired && 'Added ' + b.acquired].filter(Boolean)
+      [b.genre, b.shelf && '📍 ' + b.shelf, b.acquired && 'Added ' + b.acquired, b.isbn && 'ISBN ' + b.isbn].filter(Boolean)
         .forEach((t) => { const s = document.createElement('span'); s.textContent = t; meta.append(s); });
       card.querySelector('.notes').textContent = b.notes || '';
       card.querySelector('.pill').textContent = b.status || 'To read';
