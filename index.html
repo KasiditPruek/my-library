@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My Library</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #f7f3ec;
+    --card: #fffdf9;
+    --ink: #2b2620;
+    --muted: #7a6f62;
+    --line: #e4dccf;
+    --accent: #1f3864;
+    --accent-soft: #e6ebf4;
+    --read: #2f7d4f;
+    --reading: #b7791f;
+    --toread: #5a6b8c;
+    --danger: #b3261e;
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--paper); color: var(--ink);
+    font: 15px/1.5 Inter, system-ui, -apple-system, Segoe UI, sans-serif;
+  }
+  header {
+    max-width: 1100px; margin: 0 auto; padding: 32px 20px 8px;
+    display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+  }
+  h1 { font-family: Fraunces, Georgia, serif; font-weight: 700; font-size: 34px; margin: 0; letter-spacing: -0.5px; }
+  h2 { font-family: Fraunces, Georgia, serif; font-weight: 500; font-size: 20px; margin: 0 0 14px; }
+  .sub { color: var(--muted); margin: 4px 0 0; }
+  main { max-width: 1100px; margin: 0 auto; padding: 16px 20px 60px; display: grid; grid-template-columns: 340px 1fr; gap: 24px; align-items: start; }
+  @media (max-width: 860px) { main { grid-template-columns: 1fr; } }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; }
+  .sticky { position: sticky; top: 16px; }
+  @media (max-width: 860px) { .sticky { position: static; } }
+
+  label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin: 12px 0 4px; }
+  label .req { color: var(--danger); }
+  input, select, textarea {
+    width: 100%; font: inherit; color: var(--ink); background: #fff;
+    border: 1px solid var(--line); border-radius: 8px; padding: 9px 11px; outline: none;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  textarea { resize: vertical; min-height: 64px; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  button {
+    font: inherit; font-weight: 600; border: 0; border-radius: 8px; padding: 10px 16px; cursor: pointer;
+    background: var(--accent); color: #fff;
+  }
+  button:disabled { opacity: .6; cursor: progress; }
+  button.ghost { background: transparent; color: var(--accent); border: 1px solid var(--line); }
+  .full { width: 100%; margin-top: 18px; }
+  .msg { margin-top: 10px; font-size: 14px; min-height: 20px; }
+  .msg.ok { color: var(--read); } .msg.err { color: var(--danger); }
+
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 18px; }
+  .stat { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; }
+  .stat b { display: block; font-family: Fraunces, Georgia, serif; font-size: 28px; line-height: 1.1; }
+  .stat span { color: var(--muted); font-size: 13px; }
+  @media (max-width: 520px) { .stats { grid-template-columns: repeat(2, 1fr); } }
+
+  .tools { display: grid; grid-template-columns: 1fr 150px 170px 150px; gap: 10px; margin-bottom: 14px; }
+  @media (max-width: 700px) { .tools { grid-template-columns: 1fr 1fr; } .tools input { grid-column: 1 / -1; } }
+
+  .list { display: grid; gap: 10px; }
+  .book { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; display: grid; grid-template-columns: 6px 1fr auto; gap: 14px; }
+  .spine { border-radius: 3px; background: var(--toread); }
+  .spine.Read { background: var(--read); } .spine.Reading { background: var(--reading); }
+  .title { font-family: Fraunces, Georgia, serif; font-weight: 500; font-size: 17px; }
+  .author { color: var(--muted); }
+  .meta { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 6px; font-size: 13px; color: var(--muted); }
+  .notes { margin-top: 6px; font-size: 14px; }
+  .right { text-align: right; white-space: nowrap; }
+  .pill { display: inline-block; font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 999px; background: var(--accent-soft); color: var(--toread); }
+  .pill.Read { background: #e4f2e9; color: var(--read); } .pill.Reading { background: #fbf0dc; color: var(--reading); }
+  .stars { color: #c9a227; letter-spacing: 1px; margin-top: 6px; font-size: 14px; }
+  .empty { text-align: center; color: var(--muted); padding: 40px 10px; }
+
+  dialog { border: 1px solid var(--line); border-radius: var(--radius); padding: 24px; max-width: 460px; width: calc(100% - 32px); background: var(--card); color: var(--ink); }
+  dialog::backdrop { background: rgba(43, 38, 32, .35); }
+  .hint { font-size: 13px; color: var(--muted); margin: 6px 0 0; }
+  .actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 18px; }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>My Library</h1>
+    <p class="sub" id="sub">Loading your shelves…</p>
+  </div>
+  <div style="display:flex; gap:8px">
+    <button class="ghost" id="refreshBtn" type="button">Refresh</button>
+    <button class="ghost" id="settingsBtn" type="button">Settings</button>
+  </div>
+</header>
+
+<main>
+  <section class="card sticky">
+    <h2>Add a book</h2>
+    <form id="addForm" autocomplete="off">
+      <label for="f-title">Title <span class="req">*</span></label>
+      <input id="f-title" name="title" required maxlength="300">
+
+      <label for="f-author">Author <span class="req">*</span></label>
+      <input id="f-author" name="author" required maxlength="200">
+
+      <div class="row2">
+        <div>
+          <label for="f-genre">Genre</label>
+          <select id="f-genre" name="genre"><option value="">—</option></select>
+        </div>
+        <div>
+          <label for="f-status">Status</label>
+          <select id="f-status" name="status">
+            <option value="To read">To read</option>
+            <option value="Reading">Reading</option>
+            <option value="Read">Read</option>
+          </select>
+        </div>
+      </div>
+
+      <label for="f-shelf">Shelf / location</label>
+      <input id="f-shelf" name="shelf" placeholder="e.g. Living room, shelf 2" maxlength="200">
+
+      <div class="row2">
+        <div>
+          <label for="f-rating">Rating</label>
+          <select id="f-rating" name="rating">
+            <option value="">—</option>
+            <option value="5">★★★★★</option>
+            <option value="4">★★★★</option>
+            <option value="3">★★★</option>
+            <option value="2">★★</option>
+            <option value="1">★</option>
+          </select>
+        </div>
+        <div>
+          <label for="f-acquired">Date acquired</label>
+          <input id="f-acquired" name="acquired" type="date">
+        </div>
+      </div>
+
+      <label for="f-notes">Notes</label>
+      <textarea id="f-notes" name="notes" maxlength="1000"></textarea>
+
+      <button class="full" id="addBtn" type="submit">Add to library</button>
+      <div class="msg" id="addMsg" role="status"></div>
+    </form>
+  </section>
+
+  <section>
+    <div class="stats">
+      <div class="stat"><b id="s-total">–</b><span>Books</span></div>
+      <div class="stat"><b id="s-read">–</b><span>Read</span></div>
+      <div class="stat"><b id="s-reading">–</b><span>Reading</span></div>
+      <div class="stat"><b id="s-toread">–</b><span>To read</span></div>
+    </div>
+    <div class="tools">
+      <input id="q" type="search" placeholder="Search title, author, notes…">
+      <select id="fStatus"><option value="">All statuses</option><option>Read</option><option>Reading</option><option>To read</option></select>
+      <select id="fGenre"><option value="">All genres</option></select>
+      <select id="sort">
+        <option value="recent">Newest first</option>
+        <option value="title">Title A–Z</option>
+        <option value="author">Author A–Z</option>
+        <option value="rating">Highest rated</option>
+      </select>
+    </div>
+    <div class="list" id="list"></div>
+  </section>
+</main>
+
+<dialog id="settings">
+  <form method="dialog" id="settingsForm">
+    <h2>Connect to your sheet</h2>
+    <label for="s-url">Apps Script web app URL</label>
+    <input id="s-url" placeholder="https://script.google.com/macros/s/…/exec" required>
+    <label for="s-key">Passphrase</label>
+    <input id="s-key" type="password" required>
+    <p class="hint">Both are saved only in this browser. The passphrase is the API_KEY you set in the Apps Script.</p>
+    <div class="actions">
+      <button class="ghost" value="cancel" type="button" id="cancelSettings">Cancel</button>
+      <button value="save" type="submit">Save</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+  // Optional: paste your web app URL here so you only need to type the passphrase on a new device.
+  const DEFAULT_SCRIPT_URL = '';
+
+  const $ = (id) => document.getElementById(id);
+  const store = {
+    get(k) { try { return localStorage.getItem(k) || ''; } catch (_) { return ''; } },
+    set(k, v) { try { localStorage.setItem(k, v); } catch (_) {} }
+  };
+  let cfg = { url: store.get('lib.url') || DEFAULT_SCRIPT_URL, key: store.get('lib.key') };
+  let books = [];
+
+  function openSettings() {
+    $('s-url').value = cfg.url; $('s-key').value = cfg.key;
+    $('settings').showModal();
+  }
+  $('settingsBtn').onclick = openSettings;
+  $('cancelSettings').onclick = () => $('settings').close();
+  $('settingsForm').addEventListener('submit', () => {
+    cfg = { url: $('s-url').value.trim(), key: $('s-key').value };
+    store.set('lib.url', cfg.url); store.set('lib.key', cfg.key);
+    load();
+  });
+  $('refreshBtn').onclick = () => load();
+
+  async function api(method, payload) {
+    if (!cfg.url || !cfg.key) { openSettings(); throw new Error('Connect the site to your sheet in Settings.'); }
+    let res;
+    if (method === 'GET') {
+      res = await fetch(cfg.url + '?key=' + encodeURIComponent(cfg.key));
+    } else {
+      // text/plain avoids a CORS preflight, which Apps Script doesn't answer.
+      res = await fetch(cfg.url, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(Object.assign({ key: cfg.key }, payload)) });
+    }
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || 'Request failed');
+    return data;
+  }
+
+  async function load() {
+    $('sub').textContent = 'Loading your shelves…';
+    try {
+      const data = await api('GET');
+      books = data.books;
+      fillGenres(data.genres);
+      $('sub').textContent = 'Synced with your Google Sheet · ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      render();
+    } catch (err) {
+      $('sub').textContent = err.message;
+      $('list').innerHTML = '';
+    }
+  }
+
+  function fillGenres(genres) {
+    for (const [id, first] of [['f-genre', '—'], ['fGenre', 'All genres']]) {
+      const sel = $(id), keep = sel.value;
+      sel.innerHTML = '';
+      sel.append(new Option(first, ''));
+      genres.forEach((g) => sel.append(new Option(g, g)));
+      sel.value = genres.includes(keep) ? keep : '';
+    }
+  }
+
+  function render() {
+    const count = (s) => books.filter((b) => b.status === s).length;
+    $('s-total').textContent = books.length;
+    $('s-read').textContent = count('Read');
+    $('s-reading').textContent = count('Reading');
+    $('s-toread').textContent = count('To read');
+
+    const q = $('q').value.trim().toLowerCase();
+    const fs = $('fStatus').value, fg = $('fGenre').value, sort = $('sort').value;
+    let list = books.filter((b) =>
+      (!fs || b.status === fs) && (!fg || b.genre === fg) &&
+      (!q || [b.title, b.author, b.notes, b.shelf].join(' ').toLowerCase().includes(q)));
+    const by = (k) => (a, b) => a[k].localeCompare(b[k], undefined, { sensitivity: 'base' });
+    if (sort === 'recent') list.sort((a, b) => b.row - a.row);
+    else if (sort === 'rating') list.sort((a, b) => (Number(b.rating) || 0) - (Number(a.rating) || 0));
+    else list.sort(by(sort));
+
+    const el = $('list');
+    el.innerHTML = '';
+    if (!list.length) {
+      el.innerHTML = '<div class="empty card">' + (books.length ? 'No books match your filters.' : 'No books yet. Add your first one.') + '</div>';
+      return;
+    }
+    for (const b of list) {
+      const card = document.createElement('article');
+      card.className = 'book';
+      const statusCls = (b.status || 'To read').replace(' ', '');
+      card.innerHTML =
+        '<div class="spine ' + statusCls + '"></div>' +
+        '<div><div class="title"></div><div class="author"></div><div class="meta"></div><div class="notes"></div></div>' +
+        '<div class="right"><span class="pill ' + statusCls + '"></span><div class="stars"></div></div>';
+      card.querySelector('.title').textContent = b.title;
+      card.querySelector('.author').textContent = b.author;
+      const meta = card.querySelector('.meta');
+      [b.genre, b.shelf && '📍 ' + b.shelf, b.acquired && 'Added ' + b.acquired].filter(Boolean)
+        .forEach((t) => { const s = document.createElement('span'); s.textContent = t; meta.append(s); });
+      card.querySelector('.notes').textContent = b.notes || '';
+      card.querySelector('.pill').textContent = b.status || 'To read';
+      const r = Number(b.rating) || 0;
+      card.querySelector('.stars').textContent = r ? '★'.repeat(r) + '☆'.repeat(5 - r) : '';
+      el.append(card);
+    }
+  }
+  ['q', 'fStatus', 'fGenre', 'sort'].forEach((id) => $(id).addEventListener('input', render));
+
+  $('addForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const form = e.target, msg = $('addMsg'), btn = $('addBtn');
+    const book = Object.fromEntries(new FormData(form).entries());
+    btn.disabled = true; btn.textContent = 'Adding…'; msg.className = 'msg'; msg.textContent = '';
+    try {
+      await api('POST', { book });
+      msg.className = 'msg ok'; msg.textContent = '“' + book.title + '” added to your sheet.';
+      const keepStatus = form.status.value;
+      form.reset(); form.status.value = keepStatus;
+      $('f-title').focus();
+      await load();
+    } catch (err) {
+      msg.className = 'msg err'; msg.textContent = err.message;
+    } finally {
+      btn.disabled = false; btn.textContent = 'Add to library';
+    }
+  });
+
+  load();
+</script>
+</body>
+</html>
